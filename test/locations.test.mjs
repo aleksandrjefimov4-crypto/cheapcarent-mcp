@@ -105,3 +105,18 @@ test('a known country with a query that matches nothing is still an empty list',
   assert.equal(result.isError, false)
   assert.equal(result.body.data.length, 0)
 })
+
+test('a location list the API does not send in time becomes a readable error', async () => {
+  resetLocationCache()
+  let signal
+  const result = await listLocations({}, {
+    timeoutMs: 30,
+    fetch: (url, init) => new Promise((resolve, reject) => {
+      signal = init.signal
+      init.signal?.addEventListener('abort', () => reject(init.signal.reason))
+    }),
+  })
+  assert.ok(signal, 'the fetch gets an abort signal')
+  assert.equal(result.isError, true)
+  assert.match(result.message, /did not answer within/)
+})

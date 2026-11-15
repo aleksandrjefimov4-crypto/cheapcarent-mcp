@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { createLimiter } from '../src/client-limit.mjs'
-import { PAGE_NOTICE, apiHeaders, searchCars, shapeSearchPayload } from '../src/search.mjs'
+import { API_TIMEOUT_MS, PAGE_NOTICE, apiHeaders, searchCars, shapeSearchPayload } from '../src/search.mjs'
 
 const today = '2026-11-14'
 const query = {
@@ -194,4 +194,28 @@ test('mixed currencies reach the client with the EUR comparison field', () => {
   assert.deepEqual(shaped.meta.currencies, ['EUR', 'USD'])
   assert.equal(shaped.meta.priceEurCurrency, 'EUR')
   assert.equal(Object.hasOwn(shaped.meta, 'currency'), false)
+})
+
+/** A fetch that never answers on its own and rejects only when its signal aborts. */
+function hangingFetch(seen) {
+  return (url, init) => new Promise((resolve, reject) => {
+    seen.signal = init.signal
+    init.signal?.addEventListener('abort', () => reject(init.signal.reason))
+  })
+}
+
+test('the API call gives up after 25 seconds by default', () => {
+  assert.equal(API_TIMEOUT_MS, 25_000)
+})
+
+test('a search the API does not answer in time becomes a readable error, not a hang', async () => {
+  const seen = {}
+  const started = Date.now()
+  const result = await searchCars(query, { today, limiter: createLimiter(), timeoutMs: 30, fetch: hangingFetch(seen) })
+  assert.ok(seen.signal, 'the fetch gets an abort signal')
+  assert.ok(Date.now() - started < 2_000)
+  assert.equal(result.isError, true)
+  assert.match(result.message, /did not answer within/)
+  assert.match(result.message, /again/)
+  assert.equal(result.retryAfterSeconds, undefined)
 })

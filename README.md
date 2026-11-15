@@ -49,6 +49,8 @@ npx @modelcontextprotocol/inspector -- node src/stdio.mjs
 
 The server calls `https://api.cheapcarent.com/api/v1/public/*` with `X-CCR-MCP-Key` (env `CCR_MCP_SEARCH_KEY`; the key is configured on the production server only and is not part of this repository) and `X-CCR-Client-IP`. With that key the API skips its own per-IP limit (60 a minute, 12 in 10 seconds), which would otherwise see every MCP user as the server's one IP, and logs the client address. Without the key (local runs) the API limit applies as for anyone; a 429 of up to 3 seconds is waited out once, a longer one is passed on.
 
+Each API call is aborted after 25 seconds. A search for a place and dates nobody asked for recently makes the API ask every supplier live; when that runs over, the tool returns a readable error asking to try again in a few seconds (the API finishes the work in the background and caches it). No `Retry-After` is set for a timeout, it is not a rate limit.
+
 nginx keeps its own 10 requests a second per IP on `/mcp` in front of all this.
 
 Answers are plain JSON (`enableJsonResponse`), not an SSE stream, so headers are written after the tool has run.

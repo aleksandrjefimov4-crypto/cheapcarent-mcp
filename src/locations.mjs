@@ -1,6 +1,6 @@
 /** Read-only client for the public list of cities and airports the search accepts. */
 import { setRetryAfter } from './request-context.mjs'
-import { apiHeaders, retryAfterSeconds, toolError } from './search.mjs'
+import { apiHeaders, fetchWithTimeout, isTimeout, retryAfterSeconds, timeoutMessage, toolError } from './search.mjs'
 
 export const LOCATIONS_URL = 'https://api.cheapcarent.com/api/v1/public/locations'
 export const LOCATIONS_USAGE = 'Pass countryCode as country and cityParam as city to search_cars, or pass iata for an airport.'
@@ -46,14 +46,11 @@ async function loadRows(options) {
   const now = options.now ?? Date.now()
   if (cache.rows && now - cache.at < CACHE_MS) return { isError: false, rows: cache.rows }
 
-  const fetchImpl = options.fetch ?? globalThis.fetch
   let response
   try {
-    response = await fetchImpl(LOCATIONS_URL, {
-      method: 'GET',
-      headers: apiHeaders(options),
-    })
-  } catch {
+    response = await fetchWithTimeout(LOCATIONS_URL, { method: 'GET', headers: apiHeaders(options) }, options)
+  } catch (error) {
+    if (isTimeout(error)) return toolError(timeoutMessage('The location list', options))
     return toolError('The location list could not be reached. Try again later.')
   }
   if (response.status === 429) {

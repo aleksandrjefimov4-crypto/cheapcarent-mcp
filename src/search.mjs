@@ -15,6 +15,34 @@ const OFFER_TEXT = ['category', 'brand', 'model', 'transmission', 'fuel', 'compa
 const OFFER_AMOUNTS = ['price', 'totalPrice', 'rentalPrice', 'delivery', 'priceEur']
 const META_KEYS = ['count', 'returned', 'limit', 'offset', 'currency', 'pickupDate', 'returnDate', 'pickupTime', 'returnTime']
 
+/** How long one API call may take. A cold city preview asks every supplier live. */
+export const API_TIMEOUT_MS = 25_000
+
+/** One API call that is aborted once its time runs out; the timer is cleared when it answers. */
+export async function fetchWithTimeout(url, init, options = {}) {
+  const fetchImpl = options.fetch ?? globalThis.fetch
+  const controller = new AbortController()
+  const timer = setTimeout(
+    () => controller.abort(new DOMException('The API call timed out.', 'TimeoutError')),
+    options.timeoutMs ?? API_TIMEOUT_MS,
+  )
+  try {
+    return await fetchImpl(url, { ...init, signal: controller.signal })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/** True when a fetch failed because its time ran out. */
+export function isTimeout(error) {
+  return error?.name === 'TimeoutError' || error?.name === 'AbortError'
+}
+
+export function timeoutMessage(what, options = {}) {
+  const seconds = Math.max(1, Math.round((options.timeoutMs ?? API_TIMEOUT_MS) / 1000))
+  return `${what} did not answer within ${seconds} seconds. Prices for a place and dates nobody asked for recently are fetched from the suppliers live; ask again in a few seconds.`
+}
+
 /** Request headers for the API: the key and client address only when the key is configured. */
 export function apiHeaders(options = {}) {
   const headers = { accept: 'application/json', 'user-agent': USER_AGENT }
@@ -84,15 +112,15 @@ export async function searchCars(input, options = {}) {
     if (!permit.ok) return rateLimited(permit.retryAfter)
 
     const url = `${SEARCH_URL}?${new URLSearchParams(parsed.query)}`
-    const init = { method: 'GET', headers: apiHeaders({ ...options, clientIp: client }) }
-    const fetchImpl = options.fetch ?? globalThis.fetch
+    const headers = apiHeaders({ ...options, clientIp: client })
     let response
     for (let attempt = 0; ; attempt += 1) {
       const started = Date.now()
       try {
-        response = await fetchImpl(url, init)
-      } catch {
+        response = await fetchWithTimeout(url, { method: 'GET', headers }, options)
+      } catch (error) {
         log(options, { status: 0, ms: Date.now() - started, place: parsed.place })
+        if (isTimeout(error)) return toolError(timeoutMessage('The search', options))
         return toolError('The search could not be reached. Try again later.')
       }
       log(options, { status: response.status, ms: Date.now() - started, place: parsed.place })
