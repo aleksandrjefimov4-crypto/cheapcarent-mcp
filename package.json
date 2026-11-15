@@ -1,0 +1,22 @@
+{
+  "name": "@cheapcarent/mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Read-only CheapCarRent search for MCP clients.",
+  "bin": {
+    "cheapcarent-mcp": "./src/stdio.mjs"
+  },
+  "scripts": {
+    "start": "node src/http.mjs",
+    "stdio": "node src/stdio.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "3.25.76"
+  }
+}
