@@ -5,6 +5,10 @@
   "description": "Read-only CheapCarRent car rental search: list cities and airports, get up to 8 live offers.",
   "version": "1.0.0",
   "websiteUrl": "https://cheapcarent.com",
+  "repository": {
+    "url": "https://github.com/aleksandrjefimov4-crypto/cheapcarent-mcp",
+    "source": "github"
+  },
   "remotes": [
     {
       "type": "streamable-http",
