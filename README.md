@@ -1,5 +1,7 @@
 # CheapCarRent MCP
 
+[![mcptry](https://mcptry.com/badge/com.cheapcarent/search)](https://mcptry.com/servers/com.cheapcarent/search)
+
 Read-only MCP server for CheapCarRent search. It does not book, take payment, or accept personal data.
 
 Two tools:
