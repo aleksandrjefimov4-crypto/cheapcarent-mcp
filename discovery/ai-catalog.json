@@ -1,0 +1,10 @@
+{
+  "specVersion": "1.0",
+  "entries": [
+    {
+      "identifier": "urn:air:cheapcarent.com:mcp:search",
+      "type": "application/mcp-server-card+json",
+      "url": "https://cheapcarent.com/mcp/server-card"
+    }
+  ]
+}

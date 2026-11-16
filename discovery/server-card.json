@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+  "name": "com.cheapcarent/search",
+  "version": "1.0.2",
+  "title": "CheapCarRent search",
+  "description": "Read-only CheapCarRent car rental search: list cities and airports, get up to 8 live offers.",
+  "websiteUrl": "https://cheapcarent.com",
+  "repository": {
+    "url": "https://github.com/aleksandrjefimov4-crypto/cheapcarent-mcp",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://cheapcarent.com/apps/cheapcarent-app.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://cheapcarent.com/mcp"
+    }
+  ]
+}

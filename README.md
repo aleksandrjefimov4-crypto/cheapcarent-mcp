@@ -59,6 +59,10 @@ Answers are plain JSON (`enableJsonResponse`), not an SSE stream, so headers are
 
 The API returns offers already filtered and sorted: cars only, a believable day price in EUR, no duplicates, cheapest `priceEur` first, then cut to the page. A page has at most 8 offers and the server does not walk `offset` to collect more. An empty `data` array with HTTP 200 is a normal result.
 
+## Discovery: server card and AI catalog
+
+Per [SEP-2127](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/2127-mcp-server-cards.md) the server publishes a Server Card at `https://cheapcarent.com/mcp/server-card` (`application/mcp-server-card+json`) and the domain lists it in an AI Catalog at `https://cheapcarent.com/.well-known/ai-catalog.json` (`application/ai-catalog+json`). Both are static files from `discovery/`, served with CORS, `Cache-Control: public, max-age=3600` and an ETag. `test/discovery.test.mjs` fails when the card stops matching `server.json`; after a version bump, upload the new card as well.
+
 ## CORS
 
 `/mcp` answers `GET`, `POST`, `DELETE`, and `OPTIONS`.
