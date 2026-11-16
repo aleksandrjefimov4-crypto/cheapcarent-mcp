@@ -3,8 +3,17 @@
   "name": "com.cheapcarent/search",
   "title": "CheapCarRent search",
   "description": "Read-only CheapCarRent car rental search: list cities and airports, get up to 8 live offers.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "websiteUrl": "https://cheapcarent.com",
+  "icons": [
+    {
+      "src": "https://cheapcarent.com/apps/cheapcarent-app.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
   "repository": {
     "url": "https://github.com/aleksandrjefimov4-crypto/cheapcarent-mcp",
     "source": "github"

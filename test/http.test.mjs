@@ -64,6 +64,12 @@ test('initialize and tools/list work over Streamable HTTP', async () => withServ
   const text = await list.text()
   assert.match(text, /search_cars/)
   assert.match(text, /list_locations/)
+  // Agents pick tools and fill arguments from these descriptions: every argument needs one.
+  for (const tool of parseRpc(text).result.tools) {
+    for (const [name, schema] of Object.entries(tool.inputSchema.properties)) {
+      assert.ok(typeof schema.description === 'string' && schema.description.length >= 15, `${tool.name}.${name} has no description`)
+    }
+  }
 }))
 
 test('a rate-limited search answers with a standard Retry-After header', async () => withServer(async (base) => {

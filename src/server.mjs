@@ -23,9 +23,12 @@ const READ_ONLY = {
 }
 
 const locationsSchema = z.object({
-  country: z.string().trim().length(2).optional(),
-  query: z.string().trim().min(1).max(80).optional(),
-  airports_only: z.boolean().optional(),
+  country: z.string().trim().length(2).optional()
+    .describe('Two-letter country code, e.g. ES or GR. Only places in this country are listed.'),
+  query: z.string().trim().min(1).max(80).optional()
+    .describe('City, country, alternative spelling or airport code to look for, e.g. Malaga or AGP. Accents are ignored; exact matches come first.'),
+  airports_only: z.boolean().optional()
+    .describe('true to list only places with an airport (rows that have an iata code).'),
 }).strict()
 
 function toToolResult(result) {
@@ -39,18 +42,30 @@ function toToolResult(result) {
 }
 
 const inputSchema = z.object({
-  pickup: z.string().trim().min(1).max(120).optional(),
-  country: z.string().trim().length(2).optional(),
-  city: z.string().trim().min(1).max(80).optional(),
-  iata: z.string().trim().length(3).optional(),
-  pickup_date: z.string(),
-  return_date: z.string(),
-  pickup_time: z.literal('12:00').optional(),
-  return_time: z.literal('12:00').optional(),
-  driver_age: z.number().int().min(18).max(99).optional(),
-  currency: z.literal('EUR').optional(),
-  limit: z.number().int().min(1).max(OFFER_CAP).optional(),
-  offset: z.number().int().min(0).max(1000).optional(),
+  pickup: z.string().trim().min(1).max(120).optional()
+    .describe('Free-text place name, e.g. Barcelona. Use only when list_locations gave no exact match; prefer country + city or iata.'),
+  country: z.string().trim().length(2).optional()
+    .describe('countryCode from list_locations, e.g. ES. Pass together with city.'),
+  city: z.string().trim().min(1).max(80).optional()
+    .describe('cityParam from list_locations, e.g. barcelona. Pass together with country.'),
+  iata: z.string().trim().length(3).optional()
+    .describe('Three-letter airport code from list_locations, e.g. BCN. Use instead of country + city.'),
+  pickup_date: z.string()
+    .describe('Pick-up date, YYYY-MM-DD. Today or later, within 365 days.'),
+  return_date: z.string()
+    .describe('Return date, YYYY-MM-DD. 1 to 30 days after pickup_date.'),
+  pickup_time: z.literal('12:00').optional()
+    .describe('Pick-up time. Only 12:00 is supported; may be left out.'),
+  return_time: z.literal('12:00').optional()
+    .describe('Return time. Only 12:00 is supported; may be left out.'),
+  driver_age: z.number().int().min(18).max(99).optional()
+    .describe("Driver's age in years, 18 to 99. Accepted but not used for prices: the preview is priced for a standard adult driver; age terms are on each offer's page."),
+  currency: z.literal('EUR').optional()
+    .describe('Only EUR is accepted. Offers keep their own currency in price; priceEur is always in EUR.'),
+  limit: z.number().int().min(1).max(OFFER_CAP).optional()
+    .describe(`How many offers to return, 1 to ${OFFER_CAP}. Default ${OFFER_CAP}.`),
+  offset: z.number().int().min(0).max(1000).optional()
+    .describe('How many of the cheapest offers to skip, for the next page. Default 0.'),
 }).strict()
 
 export function createMcpServer() {
