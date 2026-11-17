@@ -1,6 +1,7 @@
 # CheapCarRent MCP
 
 [![mcptry](https://mcptry.com/badge/com.cheapcarent/search)](https://mcptry.com/servers/com.cheapcarent/search)
+[![Listed in awesome-remote-mcp-servers](https://img.shields.io/badge/awesome-remote%20MCP%20servers-fc60a8?logo=awesomelists&logoColor=white)](https://github.com/punkpeye/awesome-remote-mcp-servers)
 
 Read-only MCP server for CheapCarRent search. It does not book, take payment, or accept personal data.
 
