@@ -4,7 +4,7 @@ import test from 'node:test'
 import { listLocations, resetLocationCache } from '../src/locations.mjs'
 
 const rows = [
-  { country: 'Albania', countryCode: 'AL', city: 'Tirana', cityParam: 'tirana', iata: 'TIA', hasAirport: true, alsoAccepted: ['tirane'], page: 'https://cheapcarent.com/car-rental/al/tirana', internalId: 414, supplierToken: 'secret-token' },
+  { country: 'Albania', countryCode: 'AL', city: 'Tirana', cityParam: 'tirana', iata: 'TIA', hasAirport: true, alsoAccepted: ['tirane'], page: 'https://cheapcarent.com/car-rental/al/tirana', internalId: 414, supplierToken: 'TEST_FIXTURE_INTERNAL_FIELD' },
   { country: 'Albania', countryCode: 'AL', city: 'Saranda', cityParam: 'saranda', hasAirport: false, page: 'https://cheapcarent.com/car-rental/al/saranda' },
   { country: 'Spain', countryCode: 'ES', city: 'Málaga', cityParam: 'malaga', iata: 'AGP', hasAirport: true, page: 'https://cheapcarent.com/car-rental/es/malaga' },
   { country: 'Spain', countryCode: 'ES', city: 'Bad <script>', cityParam: 'bad slug!', page: 'https://evil.example/x' },
@@ -28,7 +28,7 @@ test('returns whitelisted fields only and drops malformed rows', async () => {
   const tirana = result.body.data.find((row) => row.cityParam === 'tirana')
   assert.deepEqual(Object.keys(tirana).sort(), ['alsoAccepted', 'city', 'cityParam', 'country', 'countryCode', 'hasAirport', 'iata', 'page'])
   const encoded = JSON.stringify(result.body)
-  assert.equal(encoded.includes('secret-token'), false)
+  assert.equal(encoded.includes('TEST_FIXTURE_INTERNAL_FIELD'), false)
   assert.equal(encoded.includes('evil.example'), false)
   assert.match(counter.url, /\/api\/v1\/public\/locations$/)
 })
