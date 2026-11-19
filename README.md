@@ -5,6 +5,8 @@
 
 Read-only MCP server for CheapCarRent search. It does not book, take payment, or accept personal data.
 
+CheapCarRent covers 15,000 pickup points in 46 countries, with the site available in 19 languages. Source: [cheapcarent.com](https://cheapcarent.com).
+
 Two tools:
 
 - `list_locations` returns the cities and airports the search accepts, with the exact spelling. It reads `GET https://cheapcarent.com/api/v1/public/locations` once and keeps the list in memory for an hour. Optional filters: `country` (two-letter code), `query` (city, country, alias or airport code, accents ignored; exact matches come first) and `airports_only`. Each row has `country`, `countryCode`, `city`, `cityParam`, `iata` when there is an airport, `hasAirport`, `alsoAccepted` and the city `page`.
