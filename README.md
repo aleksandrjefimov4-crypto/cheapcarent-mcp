@@ -62,6 +62,18 @@ Answers are plain JSON (`enableJsonResponse`), not an SSE stream, so headers are
 
 The API returns offers already filtered and sorted: cars only, a believable day price in EUR, no duplicates, cheapest `priceEur` first, then cut to the page. A page has at most 8 offers and the server does not walk `offset` to collect more. An empty `data` array with HTTP 200 is a normal result.
 
+## Partner links
+
+An app or agent in the CheapCarRent affiliate program can pass its partner code to `search_cars`:
+
+```json
+{ "iata": "HER", "pickup_date": "2026-12-10", "return_date": "2026-12-14", "partner": "yourcode", "partner_sub_id": "chat_app" }
+```
+
+Every `cheapcarent.com` link in the answer (each offer `url` and `meta.location.page`) then goes through `https://api.cheapcarent.com/api/v1/affiliate/visit/{partner}?to=/same/path&sub_id=…`, and `meta.partner` repeats the code. That link records the click and opens the same page; the site keeps the click 30 days and sends it with the booking, so the booking is credited to the partner. The code is never sent to the search API and does not change prices or offers.
+
+`partner` is 3 to 40 lowercase letters, digits or hyphens; `partner_sub_id` (optional, only with `partner`) is 1 to 80 letters, digits, underscores or hyphens. The server checks the format only: a code CheapCarRent did not issue gives links that answer 404.
+
 ## Discovery: server card and AI catalog
 
 Per [SEP-2127](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/2127-mcp-server-cards.md) the server publishes a Server Card at `https://cheapcarent.com/mcp/server-card` (`application/mcp-server-card+json`) and the domain lists it in an AI Catalog at `https://cheapcarent.com/.well-known/ai-catalog.json` (`application/ai-catalog+json`). Both are static files from `discovery/`, served with CORS, `Cache-Control: public, max-age=3600` and an ETag. `test/discovery.test.mjs` fails when the card stops matching `server.json`; after a version bump, upload the new card as well.

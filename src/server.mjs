@@ -66,6 +66,10 @@ const inputSchema = z.object({
     .describe(`How many offers to return, 1 to ${OFFER_CAP}. Default ${OFFER_CAP}.`),
   offset: z.number().int().min(0).max(1000).optional()
     .describe('How many of the cheapest offers to skip, for the next page. Default 0.'),
+  partner: z.string().regex(/^[a-z0-9-]{3,40}$/).optional()
+    .describe('Partner code from the CheapCarRent affiliate program, e.g. viatico. Only for an app or agent that has one; leave out otherwise. With it, every offer and city URL goes through the partner tracking link, so a booking made from it is credited to the partner.'),
+  partner_sub_id: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/).optional()
+    .describe('Optional channel label for the partner report, e.g. chat_app. Letters, digits, underscores, hyphens; only with partner.'),
 }).strict()
 
 export function createMcpServer() {

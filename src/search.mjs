@@ -2,6 +2,7 @@
  * Searches are limited here per client (see client-limit.mjs) and sent to the API with the
  * server's key and the client's address. A wait of up to 3 seconds is waited out, not returned. */
 import { MAX_WAIT_MS, acquire, defaultLimiter, sleep } from './client-limit.mjs'
+import { partnerError, withPartnerLinks } from './partner.mjs'
 import { currentClientIp, setRetryAfter } from './request-context.mjs'
 
 
@@ -139,7 +140,7 @@ export async function searchCars(input, options = {}) {
     if (!response.ok) {
       return toolError(publicError(body, 'The search could not be completed.'))
     }
-    return { isError: false, body: shapeSearchPayload(body) }
+    return { isError: false, body: withPartnerLinks(shapeSearchPayload(body), parsed.partner, parsed.partnerSubId) }
   } catch {
     return toolError('The search could not be completed.')
   }
@@ -152,10 +153,13 @@ function validateInput(input, today) {
   const allowed = new Set([
     'pickup', 'country', 'city', 'iata', 'pickup_date', 'return_date',
     'pickup_time', 'return_time', 'driver_age', 'currency', 'limit', 'offset',
+    'partner', 'partner_sub_id',
   ])
   for (const key of Object.keys(input)) {
     if (!allowed.has(key)) return { ok: false, message: 'Unexpected search field.' }
   }
+  const partnerProblem = partnerError(input)
+  if (partnerProblem) return { ok: false, message: partnerProblem }
 
   const hasPickup = hasText(input.pickup)
   const hasCountry = hasText(input.country)
@@ -224,7 +228,7 @@ function validateInput(input, today) {
     }
     query.offset = String(input.offset)
   }
-  return { ok: true, query, place }
+  return { ok: true, query, place, partner: input.partner, partnerSubId: input.partner_sub_id }
 }
 
 function shapeOffer(row, location) {
